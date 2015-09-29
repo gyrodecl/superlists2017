@@ -12,7 +12,7 @@ class NewVisitorTest(unittest.TestCase):
     
     def test_can_start_a_list_and_retrieve_it_later(self):
         #Edith goes to our site
-        self.browser.get('http://localhost:8000')
+        self.browser.get('http://localhost:8000/lists/')
 
         #sees the title
         self.assertIn('To-Do', self.browser.title)

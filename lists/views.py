@@ -6,5 +6,5 @@ from django.utils import timezone
 from django.views import generic
 
 def home_page(request):
-    return HttpResponse("hi")
+    return HttpResponse("<html><title>To-Do lists</title></html>")
 
