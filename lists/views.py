@@ -5,9 +5,14 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.views import generic
 
+from lists.models import Item
+
 def home_page(request):
     if request.method == 'POST':
-        return render(request, 'lists/home.html' ,
-               {'new_item_text': request.POST.get('item_text','')})
-    return render(request, 'lists/home.html',{})
-
+        new_item_text = request.POST.get('item_text','')
+        if new_item_text:
+            Item.objects.create(text=new_item_text)
+            return HttpResponseRedirect(reverse('lists:home'))
+    items = Item.objects.all()
+    return render(request, 'lists/home.html' ,
+               {'items': items})
