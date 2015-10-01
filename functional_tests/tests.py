@@ -1,8 +1,10 @@
+from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unittest
 
-class NewVisitorTest(unittest.TestCase):
+
+class NewVisitorTest(LiveServerTestCase):
     
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -20,7 +22,9 @@ class NewVisitorTest(unittest.TestCase):
     
     def test_can_start_a_list_and_retrieve_it_later(self):
         #Edith goes to our site
-        self.browser.get('http://localhost:8000/lists/')
+        #'lists/'
+        print(self.live_server_url + '/lists/')
+        self.browser.get(self.live_server_url + '/lists/')
 
         #sees the title
         self.assertIn('To-Do', self.browser.title)
@@ -58,6 +62,8 @@ class NewVisitorTest(unittest.TestCase):
         self.fail('Finish the test!')
 
 
-
+'''
+#don't need this anymore since using django test runner
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
+'''
