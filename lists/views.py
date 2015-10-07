@@ -11,17 +11,29 @@ from lists.models import Item, List
 def home_page(request):
     return render(request, 'lists/home.html', {})
 
+#ch.10want this view to handle both get and post requests
+#post requests to add items to view
 def view_list(request, list_id):
     requested_list = List.objects.get(id=list_id)
+    error = None
+    if request.method == 'POST':
+        try: 
+            item = Item(text=request.POST['item_text'], list=requested_list)
+            item.full_clean()
+            item.save()
+            return HttpResponseRedirect(requested_list.get_absolute_url())   
+        except ValidationError:
+            error = "You can't have an empty list item"
     items = requested_list.item_set.all()
-    return render(request, 'lists/list.html' ,
+    return render(request, 'lists/list.html',
                {'items': items,
-                'list': requested_list})
+                'list': requested_list,
+                'error': error})
 
 
 def new_list(request):
     list_ = List.objects.create()
-    item = Item.objects.create(text=request.POST['item_text'], list=list_)
+    item = Item(text=request.POST['item_text'], list=list_)
     try:
         item.full_clean()
         item.save()
@@ -30,9 +42,12 @@ def new_list(request):
         list_.delete()
         error = "You can't have an empty list item"
         return render(request, 'lists/home.html', {'error': error})
-    return HttpResponseRedirect(reverse('lists:view_list', args=(list_.id,)))
+    return HttpResponseRedirect(list_.get_absolute_url())
 
 
+#not using this anymore--refactored to have
+#the view_list accept both GET and POST requests
+'''
 def add_item_to_list(request, list_id):
     requested_list = List.objects.get(id=list_id)
     if request.method == 'POST':
@@ -42,4 +57,4 @@ def add_item_to_list(request, list_id):
         return HttpResponseRedirect(reverse('lists:view_list', args=(requested_list.id,)))
     else:
         return HttpResponseRedirect(reverse('lists:view_list', args=(requested_list.id,)))
-    
+''' 

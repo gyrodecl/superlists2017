@@ -1,9 +1,9 @@
 {% extends 'lists/base.html' %}
 {% block headertext %}To-Do lists{% endblock headertext %}
-{% block formaction %}{% url 'lists:add_item_to_list' list.id %}{% endblock formaction %}
+{% block formaction %}{% url 'lists:view_list' list.id %}{% endblock formaction %}
 {% block remainder %}
     <table id="id_list_table" class="table">
-        {% for item in list.item_set.all %}
+        {% for item in items %}
            <tr><td>{{forloop.counter}}: {{item.text}}</td></tr>
         {% endfor %}
     </table>
