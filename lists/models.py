@@ -4,7 +4,7 @@ class List(models.Model):
     pass
 
 class Item(models.Model):
-    text = models.CharField(max_length=200, default='')
+    text = models.TextField(default='',blank=False)
     list = models.ForeignKey(List, default=None)
 
 

@@ -2,6 +2,7 @@ from django.core.urlresolvers import resolve, reverse
 from django.test import TestCase
 from django.template.loader import render_to_string
 from django.http import HttpRequest
+from django.utils.html import escape
 
 from lists.views import home_page
 from lists.models import Item, List
@@ -63,6 +64,25 @@ class NewListTest(TestCase):
         )
         self.assertEqual(response.content.decode(), expected_html)
         '''
+        
+    #ch.10
+    def test_validation_errors_are_sent_back_to_home_page_template(self):
+        response = self.client.post('/lists/new',
+                                        data={'item_text':''})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'lists/home.html')
+        expected_error = escape("You can't have an empty list item")
+        self.assertContains(response, expected_error)
+        
+    #ch.10
+    def test_invalid_input_does_not_create_list_or_items(self):
+        response = self.client.post(reverse('lists:new_list'),
+                                    data={'item_text':''})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Item.objects.count(), 0)
+        self.assertEqual(List.objects.count(), 0)
+    
+        
     
 #adding new item to an existing test
 class NewItemTest(TestCase):

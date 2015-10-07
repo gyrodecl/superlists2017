@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.views import generic
@@ -20,8 +21,17 @@ def view_list(request, list_id):
 
 def new_list(request):
     list_ = List.objects.create()
-    Item.objects.create(text=request.POST['item_text'], list=list_)
+    item = Item.objects.create(text=request.POST['item_text'], list=list_)
+    try:
+        item.full_clean()
+        item.save()
+        print("here")
+    except ValidationError:
+        list_.delete()
+        error = "You can't have an empty list item"
+        return render(request, 'lists/home.html', {'error': error})
     return HttpResponseRedirect(reverse('lists:view_list', args=(list_.id,)))
+
 
 def add_item_to_list(request, list_id):
     requested_list = List.objects.get(id=list_id)
