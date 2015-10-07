@@ -1,0 +1,25 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>To-Do lists</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{% static 'lists/css/bootstrap.css' %}" rel="stylesheet" type="text/css">
+    <!--<link href=".css" rel="stylesheet" type="text/css" />-->
+</head>
+<body>
+    <h1>{% block headertext %}{% endblock headertext %}</h1>
+    <form method="POST" action="{% block formaction %}{% endblock formaction %}">
+        {% csrf_token %}
+        <input id="id_new_item" type="text"
+               name="item_text"
+               placeholder="Enter a to-do item" />
+    </form>
+    {% block remainder %}{% endblock remainder %}
+    <script src="{% static 'lists/javascript/jquery.js' %}"></script>
+    <script src="{% static 'lists/javascript/bootstrap.js' %}"></script>
+</body>
+</html>
+
