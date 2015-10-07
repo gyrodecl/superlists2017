@@ -1,9 +1,10 @@
 from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unittest
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -107,7 +108,7 @@ class NewVisitorTest(LiveServerTestCase):
         )
         
         # she starts a new list and sees the input is nicely centered there
-        inputbox.send_keys('testing\n')
+        inputbox.send_keys('testing')
         inputbox.send_keys(Keys.ENTER)
         #now get the inputbox here
         inputbox = self.browser.find_element_by_id('id_new_item')
