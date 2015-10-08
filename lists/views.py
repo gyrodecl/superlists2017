@@ -7,9 +7,10 @@ from django.utils import timezone
 from django.views import generic
 
 from lists.models import Item, List
+from lists.forms import ItemForm
 
 def home_page(request):
-    return render(request, 'lists/home.html', {})
+    return render(request, 'lists/home.html', {'form': ItemForm()})
 
 #ch.10want this view to handle both get and post requests
 #post requests to add items to view
