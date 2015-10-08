@@ -18,32 +18,32 @@ def view_list(request, list_id):
     requested_list = List.objects.get(id=list_id)
     error = None
     if request.method == 'POST':
-        try: 
-            item = Item(text=request.POST['text'], list=requested_list)
-            item.full_clean()
+        form = ItemForm(data=request.POST)
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.list = requested_list
             item.save()
-            return HttpResponseRedirect(requested_list.get_absolute_url())   
-        except ValidationError:
-            error = "You can't have an empty list item"
+            return HttpResponseRedirect(requested_list.get_absolute_url())         
+    else:
+        form = ItemForm()
     items = requested_list.item_set.all()
-    return render(request, 'lists/list.html',
-               {'items': items,
+    #print(form)
+    return render(request, 'lists/list.html', {'items': items,
                 'list': requested_list,
-                'error': error})
+                'form': form})
+
 
 
 def new_list(request):
-    list_ = List.objects.create()
-    item = Item(text=request.POST['text'], list=list_)
-    try:
-        item.full_clean()
+    form = ItemForm(data=request.POST)
+    if form.is_valid():
+        list_ = List.objects.create()
+        item = form.save(commit=False)
+        item.list = list_
         item.save()
-        print("here")
-    except ValidationError:
-        list_.delete()
-        error = "You can't have an empty list item"
-        return render(request, 'lists/home.html', {'error': error})
-    return HttpResponseRedirect(list_.get_absolute_url())
+        return HttpResponseRedirect(list_.get_absolute_url())
+    else:
+        return render(request, 'lists/home.html', {"form": form})
 
 
 #not using this anymore--refactored to have
