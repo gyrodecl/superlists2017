@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.views import generic
 
 from lists.models import Item, List
-from lists.forms import ItemForm
+from lists.forms import ItemForm, ExistingListItemForm
 
 def home_page(request):
     return render(request, 'lists/home.html', {'form': ItemForm()})
@@ -18,12 +18,12 @@ def view_list(request, list_id):
     requested_list = List.objects.get(id=list_id)
     error = None
     if request.method == 'POST':
-        form = ItemForm(data=request.POST)
+        form = ExistingListItemForm(for_list=requested_list,data=request.POST)
         if form.is_valid():
-            item = form.save(for_list=requested_list)
+            item = form.save()
             return HttpResponseRedirect(requested_list.get_absolute_url())         
     else:
-        form = ItemForm()
+        form = ExistingListItemForm(for_list=requested_list)
     items = requested_list.item_set.all()
     #print(form)
     return render(request, 'lists/list.html', {'items': items,
