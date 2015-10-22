@@ -1,6 +1,8 @@
 import sys
 import requests
 
+import logging
+from django.conf import settings
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -10,13 +12,18 @@ DOMAIN = 'localhost'
 class PersonaAuthenticationBackend(object):
 
     def authenticate(self, assertion):
+        logging.warning('entering authenticate function')
+
         #send the assertion to Mozilla's verifier service.
-        data =  {'assertion': assertion, 'audience': DOMAIN}
+        data = {'assertion': assertion, 'audience': DOMAIN}
         #print('sending data to mozilla', data, file=sys.stderr)
         response = requests.post(
             PERSONA_VERIFY_URL,
             data={'assertion': assertion, 'audience': DOMAIN}
         )
+        logging.warning('got response from persona')
+        logging.warning(response.content.decode())
+        
         if response.ok and response.json()['status'] =='okay':
             user_email = response.json()['email']
             try:
