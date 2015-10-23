@@ -17,7 +17,8 @@ class MyListsTest(FunctionalTest):
         #session[BACKEND_SESSION_KEY] = settings.AUTHENTICATION_BACKENDS[0]
         #session.save()
         if self.against_staging:
-            session_key = create_session_on_server(self.server_host, email)
+            #session_key = create_session_on_server(self.server_host, email)
+            session_key = create_sesion_on_server('tdd-lists-staging',email)
         else:
             session_key = create_pre_authenticated_session(email)
         
