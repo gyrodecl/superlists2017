@@ -18,6 +18,7 @@ class FunctionalTest(StaticLiveServerTestCase):
             if 'liveserver' in arg:
                 cls.server_host = arg.split('=')[1]
                 cls.server_url = 'http://' + cls.server_host
+                cls.server_host = 'tdd-lists-staging'
                 cls.against_staging = True
                 return  
         super().setUpClass()
