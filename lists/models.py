@@ -1,8 +1,9 @@
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class List(models.Model):
-    pass
 
     def get_absolute_url(self):
         return reverse('lists:view_list', args=[self.id])

@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.views import generic
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 from lists.models import Item, List
 from lists.forms import ItemForm, ExistingListItemForm
@@ -35,7 +37,9 @@ def view_list(request, list_id):
 def new_list(request):
     form = ItemForm(data=request.POST)
     if form.is_valid():
-        list_ = List.objects.create()
+        list_ = List()
+        list_.owner = request.user
+        list_.save()
         item = form.save(for_list=list_)
         return HttpResponseRedirect(list_.get_absolute_url())
     else:
@@ -43,7 +47,9 @@ def new_list(request):
 
 #ch18 mylists
 def my_lists(request, user_email):
-    return render(request, 'lists/my_lists.html')
+    owner = User.objects.get(email=user_email)
+    return render(request, 'lists/my_lists.html',
+                  {'owner':owner})
 
 
 
