@@ -16,6 +16,11 @@
     <nav class="navbar navbar-default" role="navigation">
         <a class="navbar-brand" href="/">Superlists</a>
         {% if user.email %}
+            <ul class="nav navbar-nav">
+               <li>
+                 <a href="{% url 'lists:my_lists' user.email %}">My lists</a>
+               </li>
+            </ul>
             <a class="btn navbar-btn navbar-right" id="id_logout" href="{% url 'accounts:logout' %}">
                 Log out</a>
             <span class="navbar-text navbar-right">Logged in as {{user.email}}</span>  
@@ -29,6 +34,8 @@
       <div class="col-md-6 col-md-offset-3 jumbotron">  
           <div class="text-center"> 
            <h1>{% block headertext %}{% endblock headertext %}</h1>
+           
+           {% block list_form %}
            <form method="POST" action="{% block formaction %}{% endblock formaction %}">
                {% csrf_token %}
                {{form.text}}
@@ -38,6 +45,7 @@
                   </div>
                {% endif %}
             </form>
+           {% endblock list_form %}
           </div>
       </div> 
     </div>
@@ -47,6 +55,21 @@
            {% block remainder %}{% endblock remainder %}
         </div>
     </div>
+    
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            {% block table %}
+            {% endblock table%}
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            {% block extra_content %}
+            {% endblock extra_content %}
+        </div
+    </div>
+    
 </div>
     <script src="{% static 'lists/javascript/jquery.js' %}"></script>
     <script src="{% static 'lists/javascript/bootstrap.js' %}"></script>

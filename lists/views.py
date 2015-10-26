@@ -41,6 +41,11 @@ def new_list(request):
     else:
         return render(request, 'lists/home.html', {"form": form})
 
+#ch18 mylists
+def my_lists(request, user_email):
+    return render(request, 'lists/my_lists.html')
+
+
 
 #not using this anymore--refactored to have
 #the view_list accept both GET and POST requests
