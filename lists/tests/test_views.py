@@ -6,9 +6,12 @@ from django.utils.html import escape
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-from lists.views import home_page, new_list
+from lists.views import home_page, new_list, new_list2
 from lists.models import Item, List
 from lists.forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR
+
+import unittest
+from unittest.mock import Mock, patch
 
 class ListViewTest(TestCase):
     
@@ -110,7 +113,7 @@ class ListViewTest(TestCase):
 
 
 
-class NewListTest(TestCase):
+class NewListViewIntegratedTest(TestCase):
     
     def test_saving_a_POST_request(self):
         response = self.client.post(
@@ -166,10 +169,32 @@ class NewListTest(TestCase):
                                         data={'text':''})
         self.assertIsInstance(response.context['form'], ItemForm)
     
-    #ch.18
-    def test_list_owner_is_saved_if_user_is_authenticated(self):
+    #Ch.19 this was mocked version---we're going to make things more isolated next
+    #ch.19--now with mocks
+    # mockList is a mock of the List class, while mock_list is an instance of the
+    # mocked list class, a fake list object.
+    '''
+    @patch('lists.views.List')
+    def test_list_owner_is_saved_if_user_is_authenticated(self, mockList):
+        mock_list = List.objects.create()
+        mock_list.save = Mock()
+        mockList.return_value = mock_list
         request = HttpRequest()
+        #request.user = User.objects.create()
+        request.user = Mock()
+        request.user.is_authenticated.return_value = True
+        request.POST['text'] = 'new list item'
+        
+        def check_owner_assigned():
+            self.assertEqual(mock_list.owner, request.user)
+        mock_list.save.side_effect = check_owner_assigned  
+            
+        new_list(request)
+        
+        mock_list.save.assert_called_once_with()
+    '''   
     
+    '''
     #ch18 want to make sure that owner is associated with list
     def test_list_owner_is_saved_if_user_is_authenticated(self):
         request = HttpRequest()
@@ -178,10 +203,73 @@ class NewListTest(TestCase):
         new_list(request)
         list_ = List.objects.first()
         self.assertEqual(list_.owner, request.user)
+    '''
     
+    # CH19 our old intgrated test is a sanity check
+    #@unittest.skip
+    def test_list_owner_is_saved_if_user_is_authenticated(self):
+        request = HttpRequest()
+        request.user = User.objects.create(email='a@b.com')
+        request.POST['text'] = 'new list item'
+        new_list2(request)
+        list_ = List.objects.first()
+        self.assertEqual(list_.owner, request.user)
+
+
+# CH.19--now using the updated NewListForm
+@patch('lists.views.NewListForm')  #1 mock out the form since we'll use it in all the tests
+class NewListViewUnitTest(unittest.TestCase):  #2
+
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.POST['text'] = 'new list item'  #3set up basic POST by hand rather than the overly integrated Django Test Client
+        self.request.user = Mock()
+
+    # First test, make sure view creates NewListForm with the correct constructor
+    def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
+        new_list2(self.request)
+        mockNewListForm.assert_called_once_with(data=self.request.POST)
+
+    def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+        new_list2(self.request)
+        mock_form.save.assert_called_once_with(owner=self.request.user)    
     
+    # when form is valid we want the view to redirect to the view
+    # for that list, so we mock out the redirect function
+    @patch('lists.views.redirect')  #1
+    def test_redirects_to_form_returned_object_if_form_valid(
+        self, mock_redirect, mockNewListForm  #2 patch decorators are innermost first, so method mocked before mockNewListForm
+    ):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True  #3
+
+        response = new_list2(self.request)
+
+        self.assertEqual(response, mock_redirect.return_value)  #4check that the response from the view is the result of the redirect function
+        mock_redirect.assert_called_once_with(mock_form.save.return_value)  #
     
-     
+    # when form is invalid, want to make sure it renders the home page template
+    @patch('lists.views.render')
+    def test_renders_home_template_with_form_if_form_invalid(
+        self, mock_render, mockNewListForm
+    ):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        
+        response = new_list2(self.request)
+        
+        self.assertEqual(response, mock_render.return_value)
+        mock_render.assert_called_once_with(
+            self.request, 'lists/home.html', {"form": mock_form}
+        )
+    
+    def test_does_not_save_if_form_invalid(self, mockNewListForm):
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        new_list2(self.request)
+        self.assertFalse(mock_form.save.called)
 
 #ch18
 class MyListsTest(TestCase):
@@ -203,7 +291,6 @@ class MyListsTest(TestCase):
         
 class HomePageTest(TestCase):
     maxDiff = None
-
     
     def test_home_page_renders_home_template(self):
         response = self.client.get(reverse('lists:home'))

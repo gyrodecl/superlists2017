@@ -6,10 +6,11 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.views import generic
 from django.contrib.auth import get_user_model
+from django.shortcuts import render, redirect
 User = get_user_model()
 
 from lists.models import Item, List
-from lists.forms import ItemForm, ExistingListItemForm
+from lists.forms import ItemForm, ExistingListItemForm, NewListForm
 
 def home_page(request):
     return render(request, 'lists/home.html', {'form': ItemForm()})
@@ -33,7 +34,8 @@ def view_list(request, list_id):
                 'form': form})
 
 
-
+# our old new_list that wasn't optimized
+'''
 def new_list(request):
     form = ItemForm(data=request.POST)
     if form.is_valid():
@@ -44,6 +46,27 @@ def new_list(request):
         return HttpResponseRedirect(list_.get_absolute_url())
     else:
         return render(request, 'lists/home.html', {"form": form})
+'''
+# ch.19
+def new_list(request):
+    form = ItemForm(data=request.POST)
+    if form.is_valid():
+        list_ = List()
+        if request.user.is_authenticated():
+            list_.owner = request.user
+        list_.save()
+        form.save(for_list=list_)
+        return HttpResponseRedirect(list_.get_absolute_url())
+    else:
+        return render(request, 'lists/home.html', {"form": form})
+
+# ch.19--first step toward a list view that pushes more work into the form
+def new_list2(request):
+    form = NewListForm(data=request.POST)
+    if form.is_valid():
+        list_ = form.save(owner=request.user)
+        return redirect(list_)
+    return render(request, 'lists/home.html', {'form': form})
 
 #ch18 mylists
 def my_lists(request, user_email):

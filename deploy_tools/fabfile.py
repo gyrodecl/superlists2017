@@ -37,6 +37,7 @@ def _get_latest_source(source_folder):
 
 #here the "site_name" needs to be the web accessible url 
 #we also should probably use environmental variables to set secret keys! 
+#in settings.py we have DOMAIN varaible and ALLOWED_HOSTS=[DOMAIN]
 def _update_settings(source_folder, site_name): 
     settings_path = source_folder + '/superlists2015/settings.py' 
     sed(settings_path, "DEBUG = TRUE", "DEBUG = False") 

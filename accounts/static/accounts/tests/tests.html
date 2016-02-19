@@ -26,6 +26,8 @@ test("smoke test", function() {
 });
 */
 //[1]
+// does initialize function bind the click event on the id_login to the
+// method.id.request of the object we pass in?
 test("initialize binds sign in button to navigator.id.request", function() {
     var requestWasCalled = false;
     var mockRequestFunction = function() { requestWasCalled = true; };
@@ -114,7 +116,7 @@ test("onlogin does ajax post to login url", function() {
 //[5]
 test("onlogin sends assertion with csrf token", function() {
    Superlists.Accounts.initialize(mockNavigator, user, token, urls);
-   var onloginCallback = mockNavigator.id.watch.firstCall.args[0].onlogin 
+    var onloginCallback = mockNavigator.id.watch.firstCall.args[0].onlogin 
     var assertion = 'browser-id assertion';
     onloginCallback(assertion);
     equal(requests[0].requestBody,

@@ -1,5 +1,11 @@
 from django.core.management.base import BaseCommand
 
+'''
+Call this method with:
+$ python manage.py say_hi "name here"  OR
+$ python manage.py say_hi name=namehere 
+'''
+
 class Command(BaseCommand):
     
     def add_arguments(self, parser):
