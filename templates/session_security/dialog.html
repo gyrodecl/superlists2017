@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<div id="session_security_warning" class="session_security" style="display:none">
+    <div class="session_security_overlay"></div>
+    <div class="session_security_modal">
+        <h3>{% trans 'Your session is about to expire Sir!' %}</h3>
+        <p>{% trans 'Click if you would like to continue working.' %}</p>
+    </div>
+</div>
+

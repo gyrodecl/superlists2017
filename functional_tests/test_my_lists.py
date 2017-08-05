@@ -62,6 +62,9 @@ class MyListsTest(FunctionalTest):
         #She sees that her list is in there, named according to its
         #first list item---make sure clicking on it takes us to the right page
         self.browser.find_element_by_link_text('Reticulate splines').click()
+        self.wait_for(
+            lambda: self.assertEqual(self.browser.current_url, first_list_url)
+        )
         self.assertEqual(self.browser.current_url, first_list_url)
         
         #She decides to start another list, just to see

@@ -4,24 +4,23 @@ Provisioning a new site
 ## Required packages:
 
 * nginx
-* Python 3
+* Python 3.6
 * Git
-* pip
-* virtualenv
+* virtualenv + pip
 
 eg, on Ubuntu:
 
-    sudo apt-get install nginx git python3 python3-pip
-    sudo pip3 install virtualenv
+    sudo apt-get-repository ppa:fkrull/deadsnakes
+    sudo apt-get install nginx git python36 python3.6-venv
 
 ## Nginx Virtual Host config
 
 * see nginx.template.conf
 * replace SITENAME with, eg, staging.my-domain.com
 
-## Upstart Job
+## Systemd service
 
-* see gunicorn-upstart.template.conf
+* see gunicorn-systemd.template.service
 * replace SITENAME with, eg, staging.my-domain.com
 
 ## Folder structure:
