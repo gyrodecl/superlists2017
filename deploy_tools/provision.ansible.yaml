@@ -1,0 +1,56 @@
+---
+
+- hosts: all
+
+  vars:
+      host: "{{ inventory_hostname }}"
+      sitename: "tdd-lists-staging"
+
+  tasks:
+
+    - name: Deadsnakes PPA to get Python 3.6
+      apt_repository:
+        repo='ppa:fkrull/deadsnakes'
+        
+    - name: make sure required packages are installed
+      apt: pkg=nginx,git,python3.6,python3.6-venv state=present
+
+    - name: allow long hostnames in nginx
+      lineinfile:
+        dest=/etc/nginx/nginx.conf
+        regexp='(\s+)#? ?server_names_hash_bucket_size'
+        backrefs=yes
+        line='\1server_names_hash_bucket_size 64;'
+
+    - name: add nginx config to sites-available
+      template: src=./nginx.conf.j2 dest=/etc/nginx/sites-available/{{ sitename }}
+      notify:
+          - restart nginx
+
+    - name: add symlink in nginx sites-enabled
+      file:
+          src=/etc/nginx/sites-available/{{ sitename }}
+          dest=/etc/nginx/sites-enabled/{{ sitename }}
+          state=link
+      notify:
+          - restart nginx
+          
+    - name: write gunicorn service script
+      template:
+          src=./gunicorn.service.j2
+          dest=/etc/systemd/system/gunicorn-{{ sitename }}.service
+      notify:
+          - restart gunicorn
+
+  handlers:
+    - name: restart nginx
+      service:  name=nginx state=restarted
+
+    - name: restart gunicorn
+      systemd:
+          name=gunicorn-{{ sitename }}
+          daemon_reload=yes
+          enabled=yes
+          state=restarted
+    
+...

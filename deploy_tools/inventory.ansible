@@ -1,0 +1,8 @@
+[production]
+ec2-34-223-249-218.us-west-2.compute.amazonaws.com ansible_become=yes ansible_ssh_user=shaq ansible_ssh_private_key_file=cs184-gyrcl.pem ansible_python_interpreter=/usr/bin/python3
+
+[staging]
+ec2-34-223-249-218.us-west-2.compute.amazonaws.com ansible_become=yes ansible_ssh_user=shaq
+
+[local]
+localhost ansible_ssh_user=root ansible_ssh_port=6666 ansible_host=127.0.0.1

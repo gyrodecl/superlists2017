@@ -2,16 +2,18 @@ from fabric.contrib.files import append, exists, sed
 from fabric.api import env, local, run
 import random
 
-REPO_URL = 'https://github.com/gyrodecl/superlists2015.git'
+REPO_URL = 'https://github.com/gyrodecl/superlists2017.git'
 
 env.key_filename=['cs184-gyrcl.pem'] 
-env.hosts = ["ubuntu@54.213.139.227"] 
+env.hosts = ["ubuntu@54.218.13.209"] 
 
 # call this:  fab deploy:host=elspeth@superlists.staging.ottg.eu
 
 def deploy(username='ubuntu',site_name='tdd-lists-staging',
-           site_url='ec2-54.213.139.227.us-west-2.compute.amazonaws.com/'):
+           site_url='ec2-54.218.13.209.us-west-2.compute.amazonaws.com/'):
     site_folder = '/home/%s/sites/%s' % (username, site_name)  
+    #site_folder = f'/home/{env.user}/sites/{env.host}'
+     #site_folder = f'/home/{username}/sites/{site_name}'
     source_folder = site_folder + '/source'
     _create_directory_structure_if_necessary(site_folder)
     _get_latest_source(source_folder)
@@ -30,7 +32,7 @@ def _create_directory_structure_if_necessary(site_folder):
 #run runs it on the remote server 
 #local runs it on the local machine 
 def _get_latest_source(source_folder): 
-    print source_folder 
+    print(source_folder)
     if exists(source_folder + '/.git'): 
         run('cd %s && git fetch' % (source_folder,))
         #python3.6 version with f string
@@ -54,10 +56,16 @@ def _update_settings(source_folder, site_name):
     #sed(settings_path, 
     #    'ALLOWED_HOSTS = .+$', 
     #    'ALLOWED_HOSTS = ["%s"]' % (site_name,) 
-    #) 
+    #)
+    # PYTHON 3 VERSION
+    #sed(settings_path,
+    #    'ALLOWED_HOSTS =.+$',
+    #    f'ALLOWED_HOSTS = ["{site_name}"]'  
+    #)
+    
     secret_key_file = source_folder + '/superlists2017/secret_key.py' 
     if not exists(secret_key_file): 
-        print 'doesnt exist' 
+        print('doesnt exist') 
         chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)' 
         key = ''.join(random.SystemRandom().choice(chars) for _ in range(50)) 
         append(secret_key_file, "SECRET_KEY = '%s'" % (key,))
@@ -69,15 +77,15 @@ def _update_settings(source_folder, site_name):
 def _update_virtualenv(source_folder): 
     virtualenv_folder = source_folder + '/../virtualenv' 
     if not exists(virtualenv_folder + '/bin/pip'): 
-        run('virtualenv --python=python3 %s' % (virtualenv_folder,))
-        # python 3.6 version
-        # run(f'python3.6 -m venc {virtualenv_folder}')
+        #run('virtualenv --python=python3 %s' % (virtualenv_folder,))
+        #python 3.6 version
+        run(f'python3.6 -m venv {virtualenv_folder}')
     
-    run('%s/bin/pip install -r %s/requirements.txt' % ( 
-            virtualenv_folder, source_folder 
-    ))
+    #run('%s/bin/pip install -r %s/requirements.txt' % ( 
+    #        virtualenv_folder, source_folder 
+    #))
     # python 3.6 version
-    #run(f'{virtualenv_folder}/bin/pip install -r {source_folder/requirements.txt})
+    run(f'{virtualenv_folder}/bin/pip install -r {source_folder}/requirements.txt}')
     
 
 #notice how we run the virtualenv version of python, but we 
@@ -85,10 +93,24 @@ def _update_virtualenv(source_folder):
 def _update_static_files(source_folder): 
     run('cd %s && ../virtualenv/bin/python3 manage.py collectstatic --noinput' % ( 
         source_folder, 
-    )) 
-
+    ))
+    # python 3.6 version
+    #run(
+    #    f'cd {source_folder}'  
+    #    ' && ../virtualenv/bin/python manage.py collectstatic --noinput'  
+    #)
+    
+# Migrate database if necessary
+# This will create sqlite3 database
+# We will probably want to use postgres on separate server (that will be already set up)
+# Maybe run migrations stil
 def _update_database(source_folder): 
     run('cd %s && ../virtualenv/bin/python3 manage.py migrate --noinput' % ( 
         source_folder, 
     ))
+    # python 3.6 version
+    #run(
+    #    f'cd {source_folder}'
+    #    ' && ../virtualenv/bin/python manage.py migrate --noinput'
+    #)
 

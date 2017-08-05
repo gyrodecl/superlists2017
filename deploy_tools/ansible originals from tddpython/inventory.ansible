@@ -1,0 +1,8 @@
+[live]
+ec2-54-218-13-209.us-west-2.compute.amazonaws.com ansible_become=yes ansible_ssh_user=shaq
+
+[staging]
+ec2-54-218-13-209.us-west-2.compute.amazonaws.com ansible_become=yes ansible_ssh_user=shaq
+
+[local]
+localhost ansible_ssh_user=root ansible_ssh_port=6666 ansible_host=127.0.0.1
